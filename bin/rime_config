@@ -4,7 +4,7 @@
 require 'pathname'
 require 'optparse'
 
-VER = '0.1'
+VER = '0.1.1'
 RIME_DIR = File.expand_path '~/Library/Rime'
 BIN_DIR = File.expand_path File.dirname Pathname.new($0).realpath.to_s
 LIBEXEC_DIR = File.expand_path File.join BIN_DIR, '../libexec'
