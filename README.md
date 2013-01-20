@@ -6,9 +6,16 @@ The utility that makes configuring Squirrel easier.
 
 ## How to install
 
-### Download and install directly
+### Install directly
 
 ```bash
 mkdir rime_config && cd rime_config && curl -L https://github.com/lembacon/rime_config/archive/master.zip | tar zx --strip 1 && make install
+```
+
+### Install with Homebrew
+
+```bash
+brew tap lembacon/tap
+brew install rime_config
 ```
 
