@@ -1,0 +1,131 @@
+#!/usr/bin/env ruby
+# vim: set ft=ruby fenc=utf-8 sw=2 ts=2 et:
+
+require 'optparse'
+
+VER = '0.1'
+RIME_DIR = File.expand_path '~/Library/Rime'
+BIN_DIR = File.expand_path File.dirname $0
+LIBEXEC_DIR = File.expand_path File.join BIN_DIR, '../libexec'
+
+def libexec_path(name)
+  File.join LIBEXEC_DIR, name
+end
+
+def editor
+  if ENV.key? 'EDITOR'
+    ENV['EDITOR']
+  else
+    'nano'
+  end
+end
+
+def show
+  system 'ps aux | grep -v grep | grep Squirrel'
+end
+
+def reload
+  system libexec_path 'rime_reload'
+end
+
+def kill
+  system libexec_path 'rime_quit'
+end
+
+def list
+  Dir.chdir RIME_DIR
+
+  # cannot use Ruby-1.9-specific features, since OS X only comes with Ruby 1.8, wtf...
+  #IO.popen [libexec_path('rime_dict_manager'), '--list', :err => [:child, :out]] do |io|
+  #  puts io.read
+  #end
+
+  puts `\"#{libexec_path 'rime_dict_manager'}\" --list 2>&1`
+  $?.success?
+end
+
+def import(dict, file)
+  file = File.expand_path file
+  Dir.chdir RIME_DIR
+  #IO.popen [libexec_path('rime_dict_manager'), '--import', dict, file, :err => [:child, :out]] do |io|
+  #  puts io.read
+  #end
+  puts `\"#{libexec_path 'rime_dict_manager'}\" --import \"#{dict}\" \"#{file}\" 2>&1`
+  $?.success?
+end
+
+def edit(file)
+  file = file + '.yaml' unless File.extname(file) == '.yaml'
+  file = File.expand_path File.join RIME_DIR, file
+  abort "'#{file}' does not exist..." unless File.file? file
+  if system "\"#{editor}\" \"#{file}\" </dev/tty"
+    reload
+  else
+    false
+  end
+end
+
+optparser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename $0} [options]"
+
+  opts.separator ''
+  opts.separator 'Synopsis:'
+  opts.separator '  The utility that makes configuring Squirrel easier'
+
+  opts.separator ''
+  opts.separator 'Options:'
+
+  opts.on '-s', '--show', 'Show running Squirrel' do
+    exit show
+  end
+
+  opts.on '-r', '--reload', 'Force Squirrel to deploy' do
+    exit reload
+  end
+
+  opts.on '-k', '--kill', 'Force Squirrel to terminate' do
+    exit kill
+  end
+
+  opts.on '-l', '--list', 'List user dictionaries' do
+    exit list
+  end
+
+  opts.on '-i', '--import DICT FILE', 'Import FILE into DICT' do |dict|
+    raise OptionParser::MissingArgument if ARGV.empty?
+    exit import dict, ARGV[0]
+  end
+
+  opts.on '-e', '--edit FILE', 'Edit configuration FILE and deploy' do |file|
+    exit edit file
+  end
+
+  opts.on '--default', 'Edit \'default.custom.yaml\' and deploy' do
+    exit edit 'default.custom'
+  end
+
+  opts.on '--squirrel', 'Edit \'squirrel.custom.yaml\' and deploy' do
+    exit edit 'squirrel.custom'
+  end
+
+  opts.on_tail '--version', 'Show version' do
+    puts VER
+    exit
+  end
+
+  opts.on_tail '-h', '--help', 'Show this message' do
+    puts opts
+    exit
+  end
+end
+
+begin
+  optparser.parse! ARGV
+  puts optparser
+  exit
+rescue OptionParser::InvalidOption, OptionParser::MissingArgument
+  puts $!.to_s
+  puts optparser
+  exit!
+end
+
