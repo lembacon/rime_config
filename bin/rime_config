@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 # vim: set ft=ruby fenc=utf-8 sw=2 ts=2 et:
 
+require 'pathname'
 require 'optparse'
 
 VER = '0.1'
 RIME_DIR = File.expand_path '~/Library/Rime'
-BIN_DIR = File.expand_path File.dirname $0
+BIN_DIR = File.expand_path File.dirname Pathname.new($0).realpath.to_s
 LIBEXEC_DIR = File.expand_path File.join BIN_DIR, '../libexec'
 
 def libexec_path(name)
