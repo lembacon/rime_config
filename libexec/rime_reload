@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /Library/Input\ Methods/Squirrel.app/Contents/MacOS/Squirrel --reload
+exec "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel" --reload
